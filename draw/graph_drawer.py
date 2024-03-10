@@ -14,3 +14,12 @@ def Draw_Graph_Circular(G, color='skyblue', labels = True):
 def Draw_Graph_Planar(G, color='skyblue', labels = True):
     nx.draw_planar(G, with_labels = labels, node_color=color)
     plt.show()
+
+def Draw_Graph_Circular_Multicolor(G : nx.Graph, colorToNodes, colors, labels = True):
+    nodesToColor = {}
+    for key in colorToNodes:
+        nodesToColor.update({value : key for value in colorToNodes[key]})
+    nodesToColor = dict(sorted(nodesToColor.items()))
+    nodeColors = [colors[nodesToColor[node]] for node in nodesToColor]
+    nx.draw_circular(G, with_labels = labels, node_color=nodeColors)
+    plt.show()

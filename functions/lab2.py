@@ -1,13 +1,9 @@
 import networkx as nx
 import random
+from collections import defaultdict
 
 def CheckZerosInSeq(A : list) :
-	allZeros = True
-	for val in A :
-		if val != 0 :
-			allZeros = False
-	if allZeros :
-		return allZeros
+	return not any(A)
 
 def GraphicSeqCheck(A : list) :
 	while True :
@@ -59,3 +55,29 @@ def RandomizeEdges(G : nx.Graph, numberOfRandomizes : int) :
 		G.remove_edge(newEdges[1][0], newEdges[1][1]) 
 	print(G.edges)
 	return G
+
+def SearchGraph(G : nx.Graph, node : int, visited : set = None) :
+	if visited is None:
+		visited = {node}
+
+	for neighbor in G.neighbors(node):
+		if neighbor not in visited:
+			visited.add(neighbor)
+			visited |= SearchGraph(G, neighbor, visited)
+
+	return visited
+
+def GraphComponents(G : nx.Graph) :
+	comp = {n : 0 for n in G.nodes}
+	nr = 0
+
+	for node in G.nodes:
+		if 0 == comp.get(node):
+			nr += 1
+			for v in SearchGraph(G, node):
+				comp[v] = nr
+
+	components = defaultdict(list)
+	for key, value in comp.items():
+		components[value].append(key)
+	return dict(components)

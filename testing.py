@@ -13,3 +13,7 @@ from functions import lab2
 print(lab2.GraphicSeqCheck([4, 3, 3, 2, 2, 1, 1]))
 drw.Draw_Graph_Circular(lab2.GraphFromGraphicSeq([1, 3, 2, 3, 2, 4, 1]))
 drw.Draw_Graph_Circular(lab2.RandomizeEdges(lab2.GraphFromGraphicSeq([1, 3, 2, 3, 2, 4, 1]), 5))
+drw.Draw_Graph_Circular_Multicolor(
+    lab2.GraphFromGraphicSeq([1, 3, 2, 3, 2, 4, 1]),
+    lab2.GraphComponents(lab2.GraphFromGraphicSeq([1, 3, 2, 3, 2, 4, 1])),
+    {1 : 'skyblue', 2 : 'red'})
