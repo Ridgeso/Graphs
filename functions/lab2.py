@@ -81,3 +81,39 @@ def GraphComponents(G : nx.Graph) :
 	for key, value in comp.items():
 		components[value].append(key)
 	return dict(components)
+
+#lab 2 zad 5
+def GraphRandomGenerate(n: int, k: int):
+	def min_index(node: int, degree: list):
+		min_degree = min(degree)
+		min_degree_nodes = [i for i, d in enumerate(degree) if d == min_degree]
+		min_index = min_degree_nodes[0]
+		if min_index != node:
+			return min_index
+		elif len(min_degree_nodes) > 1:
+			return min_degree_nodes[1]  
+		else:
+			return None
+
+	if n * k % 2 != 0 or n <= k:
+		raise ValueError("Nie można wygenerować grafu k-regularnego dla podanych wartości n i k.")    
+	
+	G = nx.Graph()
+	G.add_nodes_from(range(n))
+	degree = [0] * n
+	
+	for node in G.nodes:
+		while degree[node] < k:
+			index = min_index(node, degree)
+			if degree[index] < k and not G.has_edge(node, index):
+				G.add_edge(node, index)
+				degree[node] += 1
+				degree[index] += 1
+	G = RandomizeEdges(G, 5)
+	return G
+
+					
+					
+				
+		
+	
