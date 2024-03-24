@@ -20,8 +20,9 @@ drw.Draw_Graph_Circular_Multicolor(
     {1 : 'skyblue', 2 : 'red'})
 #lab 2 zad 5
 drw.Draw_Graph_Circular(lab2.GraphRandomGenerate(7,2))
-############################
+###########################
 G = lab2.RandomizeEdges(lab2.GraphFromGraphicSeq([1, 5, 5, 3, 2, 3, 2, 4, 1]), 5)
 lab3.randomWeights(G)
 lab3.showAllPaths(*lab3.Dijkstra(G, 1))
 drw.Draw_Graph_With_Weights(G)
+lab3.GraphCenter(G)

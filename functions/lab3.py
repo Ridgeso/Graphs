@@ -62,3 +62,18 @@ def showAllPaths(weights : dict, parents : dict) :
         
         path = f"d({p + 7}) = {weight:<4} ==> [{' - '.join(map(str, reversed(nodesOrder)))}]"
         print(path)
+
+
+def GraphCenter(G : nx.Graph) :
+    center_distances = {}
+    center_minimax_distances = {}
+    
+    for node in G.nodes:
+        distances, _  = Dijkstra(G, node)
+        center_distances[node] = sum(distances.values())
+        max_distance = max(distances.values())
+        center_minimax_distances[node] = max_distance
+    
+    center_node = min(center_distances, key=center_distances.get)
+    center_minimax_node = min(center_minimax_distances, key=center_minimax_distances.get)
+    print("Center: "  + str(center_node)  + " center minmax: " + str(center_minimax_node))
