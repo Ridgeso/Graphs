@@ -2,7 +2,8 @@ import networkx as nx
 import random
 import re
 
-def Erodos_Renyia_Edges(n,l):
+
+def ErodosRenyiaEdges(n,l):
     G = nx.Graph()
     matrix = [[-1 for x in range(n)] for y in range(n)]
     if(l > n*(n-1)/2):
@@ -19,7 +20,7 @@ def Erodos_Renyia_Edges(n,l):
             G.add_edge(int(rand1), int(rand2))
         return G
 
-def Erodos_Renyia_Probability(n,l):
+def ErodosRenyiaProbability(n,l):
     G = nx.Graph()
     matrix = [[-1 for x in range(n)] for y in range(n)]
     for i in range(n):
