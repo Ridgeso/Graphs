@@ -7,6 +7,12 @@ def randomWeights(G : nx.Graph):
         for v in G.neighbors(u):
             G.add_weighted_edges_from([(u, v, randint(1, 10))])
 
+def printWeights(distances : map):
+    print("Wagi grafu:")
+    for u in distances:
+        for v in distances:
+            print(f"{distances[u][0][v]:<4}", end = " ")
+        print()
 
 def initPaths(G : nx.Graph, s : int) :
     d = {node : inf for node in G.nodes}
@@ -36,7 +42,6 @@ def Dijkstra(G : nx.Graph, s : int) :
                 p[v] = u
                 if notInNodes:
                     nodes.append(v)
-            
     return d, p
 
 
@@ -60,20 +65,57 @@ def showAllPaths(weights : dict, parents : dict) :
             nodesOrder.append(n)
             n = parents[n]
         
-        path = f"d({p + 7}) = {weight:<4} ==> [{' - '.join(map(str, reversed(nodesOrder)))}]"
+        path = f"d({p:>3}) = {weight:>4} ==> [{' -> '.join(map(str, reversed(nodesOrder)))}]"
         print(path)
 
+def getGrapPropagation(G : nx.Graph):
+    nodeDistances = {}
+    for n in G.nodes:
+        nodeDistances[n] = Dijkstra(G, n)
+    return nodeDistances
 
-def GraphCenter(G : nx.Graph) :
+def GraphCenter(distances : map) :
     center_distances = {}
     center_minimax_distances = {}
     
-    for node in G.nodes:
-        distances, _  = Dijkstra(G, node)
-        center_distances[node] = sum(distances.values())
-        max_distance = max(distances.values())
+    for node, (dis, _) in distances.items():
+        center_distances[node] = sum(dis.values())
+        max_distance = max(dis.values())
         center_minimax_distances[node] = max_distance
     
     center_node = min(center_distances, key=center_distances.get)
     center_minimax_node = min(center_minimax_distances, key=center_minimax_distances.get)
-    print("Center: "  + str(center_node)  + " center minmax: " + str(center_minimax_node))
+    print(f"""Center: {center_node} (sum of distances: {sum(distances[center_node][0])})\n"""
+          f"""center minmax: {center_minimax_node} (max distance: {max(distances[center_node][0])})""")
+
+def PrimeAlgorithm(G : nx.Graph):
+    T = nx.Graph()
+    W = nx.Graph()
+
+    oldNode = next(iter(G))
+    T.add_node(oldNode)
+    for neigh in G.neighbors(oldNode):
+        W.add_node(neigh)
+
+    while W.nodes:
+        u = None
+        v = None
+        closest = None
+        for node in W.nodes:
+            for tNode in G.neighbors(node):
+                if not T.has_node(tNode):
+                    continue
+                if u is None or G[node][tNode]['weight'] < closest:
+                    u = tNode
+                    v = node
+                    closest = G[node][tNode]['weight']
+
+        T.add_edge(u, v, weight = closest)
+        
+        W.remove_node(v)
+        for neigh in G.neighbors(v):
+            if neigh in T.nodes:
+                continue
+            W.add_node(neigh)
+
+    return T
