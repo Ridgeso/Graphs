@@ -162,7 +162,7 @@ def NeighborhoodListToIncidence(filename : str, outputName : str) :
 #-------------------------------------------------#
 
 
-#----------------------- ZAD 2 ----------------------#
+#----------------------- ZAD 3 ----------------------#
 def ErodosRenyiaEdges(n : int, l : int):
     G = nx.Graph()
     matrix = [[-1 for x in range(n)] for y in range(n)]
