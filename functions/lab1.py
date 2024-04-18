@@ -3,8 +3,6 @@ import random
 import re
 import os
 
-
-
 def CountVertices(filename : str) :
 	vertCount = 0
 	with open(filename) as file :
@@ -160,11 +158,11 @@ def NeighborhoodListToIncidence(filename : str, outputName : str) :
 	if os.path.exists("tmp.txt") :
 		os.remove("tmp.txt")
 
-def ErodosRenyiaEdges(n,l):
+def ErodosRenyiaEdges(n : int, l : int):
     G = nx.Graph()
     matrix = [[-1 for x in range(n)] for y in range(n)]
     if(l > n*(n-1)/2):
-        print("The number of edges exceeds the maximum value for this amount of vertexes whis is " + n*(n-1)/2)
+        print("The number of edges exceeds the maximum value for this amount of vertexes which is " + n*(n-1)/2)
         return None
     else:
         for i in range(n):
@@ -177,7 +175,7 @@ def ErodosRenyiaEdges(n,l):
             G.add_edge(int(rand1), int(rand2))
         return G
 
-def ErodosRenyiaProbability(n,l):
+def ErodosRenyiaProbability(n : int, l : float):
     G = nx.Graph()
     matrix = [[-1 for x in range(n)] for y in range(n)]
     for i in range(n):
