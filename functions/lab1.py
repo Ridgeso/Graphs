@@ -3,6 +3,8 @@ import random
 import re
 import os
 
+
+#----------------------- ZAD 1 ----------------------#
 def CountVertices(filename : str) :
 	vertCount = 0
 	with open(filename) as file :
@@ -157,7 +159,10 @@ def NeighborhoodListToIncidence(filename : str, outputName : str) :
 	NeighborhoodMatrixToIncidence(filename = "tmp.txt", outputName = outputName)
 	if os.path.exists("tmp.txt") :
 		os.remove("tmp.txt")
+#-------------------------------------------------#
 
+
+#----------------------- ZAD 2 ----------------------#
 def ErodosRenyiaEdges(n : int, l : int):
     G = nx.Graph()
     matrix = [[-1 for x in range(n)] for y in range(n)]
@@ -185,3 +190,4 @@ def ErodosRenyiaProbability(n : int, l : float):
             if i>j and random.random() < l:
                 G.add_edge(int(i), int(j))
     return G
+#-------------------------------------------------#
