@@ -12,35 +12,43 @@ def saveOrShowFig():
         plt.show()
 
 #-------------------LAB 1 EXERCISE 2----------------------------#
-
-def DrawGraph(G, pos = None, color='skyblue', labels = True):
+def DrawGraph(G : nx.Graph, pos = None, color='skyblue', labels = True, name = None):
+    plt.figure(num=name)
     nx.draw(G, pos = pos, with_labels = labels, node_color=color)
     saveOrShowFig()
 
-def DrawGraphCircular(G, color='skyblue', labels = True):
+def DrawGraphCircular(G : nx.Graph, color='skyblue', labels = True, name = None):
+    plt.figure(num=name)
     nx.draw_circular(G, with_labels = labels, node_color=color)
+    ax = plt.gca()
+    circle = plt.Circle((0, 0), 1, color='red', fill=False, linestyle='dotted')
+    ax.add_artist(circle)
     saveOrShowFig()
-
 #--------------------------------------------------------------#
 
 
 
 
-def DrawGraphPlanar(G, color='skyblue', labels = True):
+def DrawGraphPlanar(G, color='skyblue', labels = True, name = None):
+    plt.figure(num=name)
     nx.draw_planar(G, with_labels = labels, node_color=color)
     saveOrShowFig()
 
-def DrawGraphCircularMulticolor(G : nx.Graph, colorToNodes, colors, labels = True):
+def DrawGraphCircularMulticolor(G : nx.Graph, colorToNodes, colors, labels = True, name = None):
+    plt.figure(num=name)
     nodesToColor = {}
     for key in colorToNodes:
         nodesToColor.update({value : key for value in colorToNodes[key]})
     nodesToColor = dict(sorted(nodesToColor.items()))
     nodeColors = [colors[nodesToColor[node]] for node in nodesToColor]
     nx.draw_circular(G, with_labels = labels, node_color=nodeColors)
-    plt.savefig(os.path.abspath(os.path.dirname(__file__)))
+    ax = plt.gca()
+    circle = plt.Circle((0, 0), 1, color='red', fill=False, linestyle='dotted')
+    ax.add_artist(circle)
     saveOrShowFig()
 
-def DrawGraphWithWeights(G : nx.Graph):
+def DrawGraphWithWeights(G : nx.Graph, name = None):
+    plt.figure(num=name)
     pos=nx.spring_layout(G) # pos = nx.nx_agraph.graphviz_layout(G)
     nx.draw_networkx(G, pos)
     labels = nx.get_edge_attributes(G, 'weight')

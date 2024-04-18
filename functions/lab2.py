@@ -1,7 +1,9 @@
 import networkx as nx
 import random
 from collections import defaultdict
+from draw import graph_drawer as drw
 
+#----------------------- ZAD 1 ----------------------#
 def CheckZerosInSeq(A : list) :
 	return not any(A)
 
@@ -34,7 +36,10 @@ def GraphFromGraphicSeq(A : list) :
 		A[0] = 0
 		dictA[list(dict.keys(dictA))[0]] = 0
 	return G
+#-------------------------------------------------#
 
+
+#----------------------- ZAD 2 --------------------#
 def RandomizeEdges(G : nx.Graph, numberOfRandomizes : int) :
 	print(G.edges)
 	def FindEdges(G) :
@@ -55,7 +60,10 @@ def RandomizeEdges(G : nx.Graph, numberOfRandomizes : int) :
 		G.remove_edge(newEdges[1][0], newEdges[1][1]) 
 	print(G.edges)
 	return G
+#----------------------------------------------------#
 
+
+#-------------------- ZAD 3 -------------------------#
 def SearchGraph(G : nx.Graph, node : int, visited : set = None) :
 	if visited is None:
 		visited = {node}
@@ -81,9 +89,64 @@ def GraphComponents(G : nx.Graph) :
 	for key, value in comp.items():
 		components[value].append(key)
 	return dict(components)
+#-------------------------------------------------#
 
-#lab 2 zad 5
-def GraphRandomGenerate(n: int, k: int):
+
+#---------------------- ZAD 4 -------------------#
+def IsBridge(G : nx.Graph, u : int, v : int):
+	comp_before = len(GraphComponents(G))
+	G_temp = G.copy()
+	G_temp.remove_edge(u, v)
+	comp_after = len(GraphComponents(G_temp))
+	return comp_before < comp_after
+
+def GraphRandomGenerateEuler(n : int):
+	while True:
+		sequence = [random.randint(0, int((n-1)/2))*2 for _ in range(n)]
+		if GraphicSeqCheck(sequence):
+			G = GraphFromGraphicSeq(sequence)
+			if len(GraphComponents(G)) == 1:
+				drw.DrawGraphCircular(G)
+				return G
+	
+def EulerCycle(G : nx.Graph):
+	if len(GraphComponents(G)) != 1:
+		print("Graf nie jest spójny!")
+		return None
+	for node in G.nodes:
+		if G.degree(node)%2 != 0:
+			print("Graf posiada wierzchołek o stopniu nieparzystym!")
+			return None
+	G_copy = G.copy()
+
+	current = list(G_copy.nodes)[0]
+
+	cycle = [current]
+
+	while G_copy.edges():
+		for neighbour in G_copy.neighbors(current):
+			if len(list(G_copy.neighbors(current))) == 1:
+				next = neighbour
+				break
+			else:
+				if not IsBridge(G_copy, current, neighbour):
+					next = neighbour
+					break
+		
+		G_copy.remove_edge(current, next)
+		cycle.append(next)
+		current = next
+
+	cycle_str = ''
+	for i in range(0, len(cycle)-2):
+		cycle_str += str(cycle[i]) + ' - '
+	return cycle_str + str(cycle[len(cycle)-1])
+
+#-------------------------------------------------#
+
+
+#---------------------- ZAD 5 -------------------------#
+def GraphRandomGenerateKRegular(n: int, k: int):
 	def min_index(node: int, degree: list):
 		min_degree = min(degree)
 		min_degree_nodes = [i for i, d in enumerate(degree) if d == min_degree]
@@ -111,9 +174,59 @@ def GraphRandomGenerate(n: int, k: int):
 				degree[index] += 1
 	G = RandomizeEdges(G, 5)
 	return G
+#-----------------------------------------------#
+					
+					
+#-------------------- ZAD 6 --------------------#	
 
-					
-					
-				
-		
+def FindHamiltonCycle(G : nx.Graph, current : int, cycle : list, visited : set):
+	cycle.append(current)
+	visited.add(current)
+
+	if len(cycle) == len(list(G.nodes)):
+		if G.has_edge(cycle[-1], cycle[0]):
+			return True
+		else:
+			cycle.pop()
+			visited.remove(current)
+			return False
 	
+	for neighbour in G.neighbors(current):
+		if neighbour not in visited:
+			if FindHamiltonCycle(G, neighbour, cycle, visited):
+				return True
+	
+	cycle.pop()
+	visited.remove(current)
+	return False
+
+def HamiltonCycle(G : nx.Graph):
+	if len(G.nodes) < 3:
+		return False
+	
+	has_degree = False
+	for node in G.nodes:
+		if G.degree(node) >= int(len(G.nodes)/2):
+			has_degree = True
+			break
+	if not has_degree:
+		return False
+
+	drw.DrawGraphCircular(G)
+
+	hamilton_cycle = []
+	visited = set()
+
+	if FindHamiltonCycle(G, list(G.nodes)[0], hamilton_cycle, visited):
+		cycle_str = ''
+		for i in range(0, len(hamilton_cycle)-1):
+			cycle_str += str(hamilton_cycle[i]) + ' - '
+		print(cycle_str + str(hamilton_cycle[0]))
+		return True
+	else:
+		return False
+
+	
+
+	
+#-----------------------------------------------#

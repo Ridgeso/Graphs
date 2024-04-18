@@ -2,7 +2,7 @@ import networkx as nx
 import random
 import re
 
-
+#-------------------- ZAD 3 ------------------------#
 def ErodosRenyiaEdges(n,l):
     G = nx.Graph()
     matrix = [[-1 for x in range(n)] for y in range(n)]
@@ -20,17 +20,21 @@ def ErodosRenyiaEdges(n,l):
             G.add_edge(int(rand1), int(rand2))
         return G
 
-def ErodosRenyiaProbability(n,l):
+def ErodosRenyiaProbability(n,p):
     G = nx.Graph()
     matrix = [[-1 for x in range(n)] for y in range(n)]
     for i in range(n):
         G.add_node(i)
     for i in range(n):
         for j in range(n):
-            if i>j and random.random() < l:
+            if i>j and random.random() < p:
                 G.add_edge(int(i), int(j))
     return G
 
+#------------------------------------------------------#
+
+
+#------------------------ ZAD 1 -----------------------#
 def CountVertices(filename : str) :
 	vertCount = 0
 	with open(filename) as file :
@@ -129,3 +133,5 @@ def IncidenceToNeighborhoodMatrix(filename : str, outputName : str) :
 					outFile.write(NeighborhoodMtx[i][j] + ' ')
 				else :
 					outFile.write(NeighborhoodMtx[i][j] + '\n')
+
+#-------------------------------------------#
