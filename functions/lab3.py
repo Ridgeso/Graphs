@@ -2,19 +2,28 @@ from math import inf
 import networkx as nx
 from random import randint
 
-def randomWeights(G : nx.Graph):
+def SetRandomWeights(G : nx.Graph, minWeight : int, maxWeight : int):
     for u in G.nodes:
         for v in G.neighbors(u):
-            G.add_weighted_edges_from([(u, v, randint(1, 10))])
+            G.add_weighted_edges_from([(u, v, randint(minWeight, maxWeight))])
 
-def printWeights(distances : map):
+def PrintWeights(distances : map):
     print("Wagi grafu:")
+
+    info = 'u\\v'
+    firstLine = f"{info:<4}| "
+    for v in distances:
+        firstLine += f"{v:<4} "
+    print(firstLine)
+    print("-" * len(firstLine))
+    
     for u in distances:
+        print(f"{u:<4}| ", end = "")
         for v in distances:
             print(f"{distances[u][0][v]:<4}", end = " ")
         print()
 
-def initPaths(G : nx.Graph, s : int) :
+def InitPaths(G : nx.Graph, s : int) :
     d = {node : inf for node in G.nodes}
     d[s] = 0
     p = {node : None for node in G.nodes}
@@ -22,7 +31,7 @@ def initPaths(G : nx.Graph, s : int) :
 
 
 def Dijkstra(G : nx.Graph, s : int) :
-    d, p = initPaths(G, s)
+    d, p = InitPaths(G, s)
     nodes = [s]
     visited = set()
 
@@ -45,7 +54,7 @@ def Dijkstra(G : nx.Graph, s : int) :
     return d, p
 
 
-def showAllPaths(weights : dict, parents : dict) :
+def ShowAllPaths(weights : dict, parents : dict) :
     root = None
     for p in parents:
         if parents[p] is None:
@@ -68,25 +77,20 @@ def showAllPaths(weights : dict, parents : dict) :
         path = f"d({p:>3}) = {weight:>4} ==> [{' -> '.join(map(str, reversed(nodesOrder)))}]"
         print(path)
 
-def getGrapPropagation(G : nx.Graph):
+def GetGrapPropagation(G : nx.Graph):
     nodeDistances = {}
     for n in G.nodes:
         nodeDistances[n] = Dijkstra(G, n)
     return nodeDistances
 
 def GraphCenter(distances : map) :
-    center_distances = {}
-    center_minimax_distances = {}
-    
-    for node, (dis, _) in distances.items():
-        center_distances[node] = sum(dis.values())
-        max_distance = max(dis.values())
-        center_minimax_distances[node] = max_distance
-    
-    center_node = min(center_distances, key=center_distances.get)
-    center_minimax_node = min(center_minimax_distances, key=center_minimax_distances.get)
-    print(f"""Center: {center_node} (sum of distances: {sum(distances[center_node][0])})\n"""
-          f"""center minmax: {center_minimax_node} (max distance: {max(distances[center_node][0])})""")
+    centerDistances = {node: sum(dis.values()) for node, (dis, _) in distances.items()}
+    centerMinMax = {node: max(dis.values()) for node, (dis, _) in distances.items()}
+
+    centerNode = min(centerDistances, key=centerDistances.get)
+    centerMinMaxNode = min(centerMinMax, key=centerMinMax.get)
+    print(f"""Center: {centerNode} (sum of distances: {centerDistances[centerNode]})\n"""
+          f"""center minmax: {centerMinMaxNode} (max distance: {centerMinMax[centerMinMaxNode]})""")
 
 def PrimeAlgorithm(G : nx.Graph):
     T = nx.Graph()
