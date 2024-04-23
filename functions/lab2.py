@@ -106,17 +106,16 @@ def GraphRandomGenerateEuler(n : int):
 		if GraphicSeqCheck(sequence):
 			G = GraphFromGraphicSeq(sequence)
 			if len(GraphComponents(G)) == 1:
-				drw.DrawGraphCircular(G)
 				return G
 	
 def EulerCycle(G : nx.Graph):
 	if len(GraphComponents(G)) != 1:
 		print("Graf nie jest spójny!")
-		return None
+		return False
 	for node in G.nodes:
 		if G.degree(node)%2 != 0:
 			print("Graf posiada wierzchołek o stopniu nieparzystym!")
-			return None
+			return False
 	G_copy = G.copy()
 
 	current = list(G_copy.nodes)[0]
@@ -124,23 +123,38 @@ def EulerCycle(G : nx.Graph):
 	cycle = [current]
 
 	while G_copy.edges():
+		if len(list(G_copy.neighbors(current))) == 0 and len(list(G_copy.edges())) >= 1:
+			print(f"Nie posiada cyklu Eulera")
+			return False
+		
+		neighbouts_without_bridge = []
+		neighbouts_with_bridge = []
 		for neighbour in G_copy.neighbors(current):
-			if len(list(G_copy.neighbors(current))) == 1:
-				next = neighbour
-				break
+			if not IsBridge(G_copy, current, neighbour):
+				neighbouts_without_bridge.append(neighbour)
 			else:
-				if not IsBridge(G_copy, current, neighbour):
-					next = neighbour
-					break
+				neighbouts_with_bridge.append(neighbour)
+
+		if len(neighbouts_without_bridge) != 0:
+			next = neighbouts_without_bridge[0]
+		elif len(neighbouts_with_bridge) != 0:
+			next = neighbouts_with_bridge[0]
 		
 		G_copy.remove_edge(current, next)
 		cycle.append(next)
 		current = next
 
 	cycle_str = ''
-	for i in range(0, len(cycle)-2):
+	G_to_show = nx.DiGraph()
+	for i in range(0, len(cycle)-1):
 		cycle_str += str(cycle[i]) + ' - '
-	return cycle_str + str(cycle[len(cycle)-1])
+	for i in range(len(list(G.nodes()))):
+		G_to_show.add_node(i)
+	for i in range(0, len(cycle)-1):
+		G_to_show.add_edge(cycle[i], cycle[i+1])
+	print(cycle_str+str(cycle[-1]))
+	drw.DrawGraphCircular(G_to_show, name='Cykl Eulera')
+	return True
 
 #-------------------------------------------------#
 
@@ -201,30 +215,41 @@ def FindHamiltonCycle(G : nx.Graph, current : int, cycle : list, visited : set):
 	return False
 
 def HamiltonCycle(G : nx.Graph):
-	if len(G.nodes) < 3:
-		return False
-	
+	if len(G.nodes) >= 3:
+		print("Twierdzenie Diraca dla liczby wierzchołków jest spełnione")
+	else:
+		print("Twierdzenie Diraca dla liczby wierzchołków nie jest spełnione")
+
 	has_degree = False
 	for node in G.nodes:
 		if G.degree(node) >= int(len(G.nodes)/2):
 			has_degree = True
 			break
-	if not has_degree:
-		return False
-
-	drw.DrawGraphCircular(G)
-
+	
+	if has_degree:
+		print("Twierdzenie Diraca dla istnienia wierzchołka o stopniu nie mniejszym niż (liczba wierzchołków)/2 jest spełnione")
+	else:
+		print("Twierdzenie Diraca dla istnienia wierzchołka o stopniu nie mniejszym niż (liczba wierzchołków)/2 jest nie spełnione")
+	
 	hamilton_cycle = []
 	visited = set()
 
 	if FindHamiltonCycle(G, list(G.nodes)[0], hamilton_cycle, visited):
 		cycle_str = ''
-		for i in range(0, len(hamilton_cycle)-1):
+		G_to_show = nx.DiGraph()
+		for i in range(0, len(hamilton_cycle)):
 			cycle_str += str(hamilton_cycle[i]) + ' - '
+			G_to_show.add_node(i)
 		print(cycle_str + str(hamilton_cycle[0]))
+		for i in range(0, len(hamilton_cycle)-1):
+			G_to_show.add_edge(hamilton_cycle[i], hamilton_cycle[i+1])
+		G_to_show.add_edge(hamilton_cycle[-1], hamilton_cycle[0])
+		drw.DrawGraphCircular(G_to_show, name="Cykl Hamiltona")
 		return True
 	else:
+		print("Graf nie posiada cyklu Hamiltona")
 		return False
+
 
 	
 
