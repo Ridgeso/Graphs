@@ -24,22 +24,31 @@ G = lab4.DigraphRandomGenerate(10, 0.2)
 # drw.DrawGraph(G)
 #-------------------------------------------------#
 
-G = lab4.DigraphRandomGenerate(5, 0.2)
+G = lab4.DigraphRandomGenerate(4, 0.2)
 while len(set(lab4.Kosaraju(G).values()))!=1:
     G = lab4.DigraphRandomGenerate(5, 0.2)
 w = lab4.GenerateWeightMatrix(G)
 
 #------------------- ZAD 3 ----------------------#
-print(lab4.BellmanFord(G, w, 1, draw=True), end='\n\n')
-lab4.PrintDistanceMatrix(G, w)
+try:
+	print(lab4.BellmanFord(G, w, 1, draw=True), end='\n\n')
+	lab4.PrintDistanceMatrix(G, w)
+except ValueError as e:
+	 print(e)
 #-------------------------------------------------#
 
-G = lab4.DigraphRandomGenerate(5, 0.2)
+G = lab4.DigraphRandomGenerate(4, 0.2)
 while len(set(lab4.Kosaraju(G).values()))!=1:
-    G = lab4.DigraphRandomGenerate(5, 0.2)
+    G = lab4.DigraphRandomGenerate(4, 0.2)
 w = lab4.GenerateWeightMatrix(G)
 
 #------------------- ZAD 4 ----------------------#
-# D = lab4.Johnson(G, w)
-# drw.DrawGraphWithWeights(G)
+try:
+	D, G_with_w = lab4.Johnson(G, w)
+	print(D)
+	for i in G_with_w.edges(data='weight'):
+		print(i)
+	drw.DrawGraphWithWeights(G_with_w)
+except ValueError as e:
+	 print(e)
 #-------------------------------------------------#

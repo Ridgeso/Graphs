@@ -131,14 +131,18 @@ def GenerateWeightMatrix(G: nx.DiGraph):
 
     return matrix
 
+def AddWeightsToGraph(G : nx.DiGraph, w) :
+    for u in w:
+        for v in w[u]:
+            if w[u][v] != float('inf'):
+                G.add_weighted_edges_from([(u, v, w[u][v])])
 
 def BellmanFord(G : nx.DiGraph, w, s : int, ret_ds_ps = False, draw = False, add_edges = True):
-    G_clone = G.copy()  
-    if draw:
-        drw.DrawGraphWithWeights(G_clone, name="Bellman-Ford")
-    for node, neighbour in G_clone.edges:
-        weigth = w[node][neighbour]
-        G_clone.add_weighted_edges_from([(node, neighbour, weigth)])
+    G_clone = G.copy()
+    G_clone.clear_edges()
+    AddWeightsToGraph(G_clone, w)
+    # if draw:
+    #     drw.DrawGraphWithWeights(G_clone, name="Bellman-Ford")
 
     ds, ps = lab3.InitPaths(G_clone, s)
 
@@ -154,10 +158,7 @@ def BellmanFord(G : nx.DiGraph, w, s : int, ret_ds_ps = False, draw = False, add
 
     for node, neighbour, weigth in G_clone.edges(data='weight'):
         if ds[neighbour] > ds[node] + weigth:
-            if ret_ds_ps:
-                return False, ds, ps
-            else:
-                return False
+            raise ValueError("Graph contains negative cyle")
     if ret_ds_ps:
         return True, ds, ps
     else:
@@ -206,18 +207,15 @@ def Johnson(G : nx.DiGraph, w):
     matrix = {u: {v: float('inf') for v in G_new.nodes} for u in G_new.nodes}
     for node, neighbour in G_new.edges:
         matrix[node][neighbour] = w[node][neighbour]
-        G_new.add_weighted_edges_from([(node, neighbour, matrix[node][neighbour])])
 
     for node in G_new.nodes:
         if node != s:
-            matrix[node][s] = 0
-            G_new.add_weighted_edges_from([(s, node, matrix[node][s])])
+            matrix[s][node] = 0
+
+    G_new.clear_edges()
+    AddWeightsToGraph(G_new, matrix)
 
     BellmanFordValue, ds, ps = BellmanFord(G_new, matrix, s, ret_ds_ps=True, add_edges=False)
-
-    if BellmanFordValue == False:
-        return None
-
     h = ds
     print(h)
 
@@ -225,7 +223,7 @@ def Johnson(G : nx.DiGraph, w):
 
     for node in G.nodes:
         for neighbour in G.neighbors(node):
-            w_new[node][neighbour] = w[node][neighbour] + h[node] - h[neighbour]
+            w_new[node][neighbour] = matrix[node][neighbour] + h[node] - h[neighbour]
     
     D = [[None]*len(G.nodes) for _ in range(len(G.nodes))]
 
@@ -238,6 +236,7 @@ def Johnson(G : nx.DiGraph, w):
     #     for j in i:
     #         print(j, end=' ')
     #     print(' ')
-    
-    return D
+    G.clear_edges()
+    AddWeightsToGraph(G, w)
+    return D, G
 #--------------------------------------------------------------#
