@@ -1,12 +1,13 @@
 import sys
 import os
+
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
 
 
 import networkx as nx
 import random
 from draw import graph_drawer as drw
-from collections import Counter #do zliczania najczesciej wystepujacego elementu
 import math
 import lab3
 
@@ -83,14 +84,14 @@ def TransposeDigraph(G : nx.DiGraph):
             G_temp.add_edge(neighbour, node)
     return G_temp
 
-def DFS_visit(G : nx.DiGraph, v : int, d : list, f : list, t : list):
+def DFS_visit(G : nx.DiGraph, v : int, d : list, t : list, stack : list):
     t[0] += 1
     d[v] = t[0]
     for neighbour in G.neighbors(v):
         if d[neighbour] == -1:
-            DFS_visit(G, neighbour, d, f, t)
+            DFS_visit(G, neighbour, d, t, stack)
     t[0] += 1
-    f[v] = t[0]
+    stack.append(v)
 
 def components_r(G : nx.DiGraph, nr : int, v : int, comp : list):
     for neighbour in G.neighbors(v):
@@ -99,29 +100,24 @@ def components_r(G : nx.DiGraph, nr : int, v : int, comp : list):
             components_r(G, nr, neighbour, comp)
 
 def Kosaraju(G : nx.DiGraph):
-    d = [-1 for _ in range(len(G.nodes))]
-    f = [-1 for _ in range(len(G.nodes))]
-    comp = [-1 for _ in range(len(G.nodes))]
-    vertices = list(G.nodes)
+    d = {v: -1 for v in G.nodes}
+    comp = {v: -1 for v in G.nodes}
+    stack = []
     t = [0]
     nr = 0
 
     for node in G.nodes:
         if d[node] == -1:
-            DFS_visit(G, node, d, f, t)
+            DFS_visit(G, node, d, t, stack)
     
     G_transposed = TransposeDigraph(G)
 
-    f, vertices = zip(*sorted(zip(f, vertices)))
-    vertices = vertices[::-1]
-
-    for node in vertices:
+    while stack:
+        node = stack.pop()
         if comp[node] == -1:
             nr += 1
             comp[node] = nr
             components_r(G_transposed, nr, node, comp)
-    
-    vertices = vertices[::-1]
 
     return comp
 #--------------------------------------------------------------#
@@ -129,85 +125,119 @@ def Kosaraju(G : nx.DiGraph):
 
 #------------------------- ZAD 3 --------------------------------#
 def GenerateWeightMatrix(G: nx.DiGraph):
-    matrix = [[None]*len(G.nodes) for _ in range(len(G.nodes))]
-    for node in range(len(G.nodes)):
-        for neighbour in G.neighbors(node):
-            matrix[node][neighbour] = random.randint(-5,10)
+    matrix = {u: {v: float('inf') for v in G.nodes} for u in G.nodes}
+    for node, neighbour in G.edges:
+        matrix[node][neighbour] = random.randint(-5,10)
+
     return matrix
 
-ds = []
-ps = []
 
-def BellmanFord(G : nx.DiGraph, w, s : int):
-    list_of_SCC = Kosaraju(G)
-    counter = Counter(list_of_SCC)
-    most_common_factor = counter.most_common(1)[0][0]
-    indexes_to_delete = [i for i, element in enumerate(list_of_SCC) if element != most_common_factor]
-    G_clone = G.copy()
+def BellmanFord(G : nx.DiGraph, w, s : int, ret_ds_ps = False, draw = False, add_edges = True):
+    G_clone = G.copy()  
+    if draw:
+        drw.DrawGraphWithWeights(G_clone, name="Bellman-Ford")
+    for node, neighbour in G_clone.edges:
+        weigth = w[node][neighbour]
+        G_clone.add_weighted_edges_from([(node, neighbour, weigth)])
 
-    for node in G.nodes:
-        if node in indexes_to_delete:
-            G_clone.remove_node(node)
-        else:
-            for neighbour in list(G.neighbors(node)):
-                weight = w[node][neighbour]
-                G_clone.add_weighted_edges_from([(node, neighbour, weight)])
-
-
-    ds = [math.inf for _ in range(len(G.nodes))]
-    ps = [None for _ in range(len(G.nodes))]
-    ds[0] = 0
+    ds, ps = lab3.InitPaths(G_clone, s)
 
     for _ in range(0, len(G_clone.nodes)-1):
-        for node in G_clone.nodes:
-            for neighbour in G_clone.neighbors(node):
-                if ds[node] > ds[neighbour] + w[node][neighbour]:
-                    ds[node] = ds[neighbour] + w[node][neighbour]
-                    ps[node] = neighbour
+        for node, neighbour, weigth in G_clone.edges(data='weight'):
+            if ds[neighbour] > ds[node] + weigth:
+                ds[neighbour] = ds[node] + weigth
+                ps[neighbour] = node
+     
+    if draw:
+        print("Bellman-Ford: ", ps)
+        drw.DrawGraphWithWeights(G_clone, name="Bellman-Ford")
 
-    for node in G_clone.nodes:
-            for neighbour in G_clone.neighbors(node):
-                if ds[node] > ds[neighbour] + w[node][neighbour]:
-                    return False
-    return True
+    for node, neighbour, weigth in G_clone.edges(data='weight'):
+        if ds[neighbour] > ds[node] + weigth:
+            if ret_ds_ps:
+                return False, ds, ps
+            else:
+                return False
+    if ret_ds_ps:
+        return True, ds, ps
+    else:
+        return True
+
+def PrintDistanceMatrix(G : nx.DiGraph, w):
+    matrix = {u: {v: float('inf') for v in G.nodes} for u in G.nodes}
+    for u in G.nodes:
+        x, ds, ps = BellmanFord(G, w, u, ret_ds_ps=True)
+        for v in G.nodes:
+            print(f"{ds[v]:>4}", end=' ')
+        print()
+
 #--------------------------------------------------------------#
 
 
 #------------------------- ZAD 4 --------------------------------#
+def Dijkstra(G : nx.DiGraph, s : int, w) :
+    d, p = lab3.InitPaths(G, s)
+    nodes = [s]
+    visited = set()
+
+    while nodes:
+        u = nodes.pop(nodes.index(min(nodes, key=lambda n: d[n])))
+        visited.add(u)
+
+        for v in G.neighbors(u):
+            if v in visited:
+                continue
+            
+            notInNodes = v not in nodes
+            newWeight = d[u] + w[u][v]
+            if d[v] > newWeight or notInNodes:
+                d[v] = newWeight
+                p[v] = u
+                if notInNodes:
+                    nodes.append(v)
+    return d, p
+
+
 def Johnson(G : nx.DiGraph, w):
     G_new = G.copy()
-    
-    new_w = [[None]*(len(G_new.nodes)+1) for _ in range(len(G_new.nodes)+1)]
-    for node in G.nodes:
-        for neighbour in G.neighbors(node):
-            new_w[node][neighbour] = w[node][neighbour]
-    
-    w = new_w
-
-    s = max(list(G_new.nodes)) + 1
+    s = max(G_new.nodes)+1
     G_new.add_node(s)
+
+    matrix = {u: {v: float('inf') for v in G_new.nodes} for u in G_new.nodes}
+    for node, neighbour in G_new.edges:
+        matrix[node][neighbour] = w[node][neighbour]
+        G_new.add_weighted_edges_from([(node, neighbour, matrix[node][neighbour])])
+
     for node in G_new.nodes:
         if node != s:
-            w[s][node] = 0
-            G_new.add_weighted_edges_from([(s, node, w[s][node])])
+            matrix[node][s] = 0
+            G_new.add_weighted_edges_from([(s, node, matrix[node][s])])
 
-    if BellmanFord(G_new, new_w, s) == False:
+    BellmanFordValue, ds, ps = BellmanFord(G_new, matrix, s, ret_ds_ps=True, add_edges=False)
+
+    if BellmanFordValue == False:
         return None
-    
-    h = [ds[i] for i in range(len(G_new.nodes))]
-    
-    w_new = [[None]*len(G_new.nodes) for _ in range(len(G_new.nodes))]
 
-    for node in G_new.nodes:
-        for neighbour in G_new.neighbors(node):
+    h = ds
+    print(h)
+
+    w_new = [[None]*len(G.nodes) for _ in range(len(G.nodes))]
+
+    for node in G.nodes:
+        for neighbour in G.neighbors(node):
             w_new[node][neighbour] = w[node][neighbour] + h[node] - h[neighbour]
     
-    D = [[None]*len(G_new.nodes) for _ in range(len(G_new.nodes))]
+    D = [[None]*len(G.nodes) for _ in range(len(G.nodes))]
 
-    for node in G_new.nodes:
-        du, _ = lab3.Dijkstra(G_new, node)
-        for node2 in G_new.nodes:
+    for node in G.nodes:
+        du, _ = Dijkstra(G, node, w_new)
+        for node2 in G.nodes:
             D[node][node2] = du[node2] - h[node] + h[node2]
+    
+    # for i in D:
+    #     for j in i:
+    #         print(j, end=' ')
+    #     print(' ')
     
     return D
 #--------------------------------------------------------------#
