@@ -54,3 +54,19 @@ def DrawGraphWithWeights(G : nx.Graph, name = None):
     labels = nx.get_edge_attributes(G, 'weight')
     nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
     saveOrShowFig()
+
+#-------------------LAB 5----------------------------#
+def draw_network(G):
+    pos = nx.spring_layout(G)
+    edge_labels = {(u, v): f"{G[u][v]['capacity']}" for u, v in G.edges()}
+    nx.draw(G, pos, with_labels=True, node_color='lightblue', node_size=500, font_size=10)
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=8)
+    plt.show()
+
+def draw_network_with_flow(G):
+    pos = nx.spring_layout(G)
+    edge_labels = {(u, v): f"{G[u][v]['flow']}/{G[u][v]['capacity']}" for u, v in G.edges()}
+    nx.draw(G, pos, with_labels=True, node_color='lightblue', node_size=500, font_size=10)
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=8)
+    plt.show()
+

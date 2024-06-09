@@ -249,9 +249,4 @@ def HamiltonCycle(G : nx.Graph):
 	else:
 		print("Graf nie posiada cyklu Hamiltona")
 		return False
-
-
-	
-
-	
 #-----------------------------------------------#
