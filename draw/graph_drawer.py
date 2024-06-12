@@ -55,6 +55,13 @@ def DrawGraphWithWeights(G : nx.Graph, name = None):
     nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
     saveOrShowFig()
 
+def DrawGraphNoWeights(G : nx.Graph, name = None):
+    plt.figure(num=name)
+    pos=nx.spring_layout(G)
+    nx.draw_networkx(G, pos)
+    nx.draw_networkx_edges(G, pos)
+    saveOrShowFig()
+
 #-------------------LAB 5----------------------------#
 def draw_network(G):
     pos = nx.spring_layout(G)
